@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CYB — Chestionar MINI + Rezultate</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--teal:#2AA5A0;--teal-deep:#1A9E9E;--teal-dark:#157575;--teal-glow:#3ECDC6;--gold:#C9A84C;--gold-warm:#D4AF37;--dark:#0F1923;--dark2:#1A2733;--dark3:#243442;--text:rgba(255,255,255,0.55);--white:#F8FAFC;--rose:#E8A0BF;--coral:#D85A30;--green:#48BB78;--red:#E07A6A;--serif:'Cormorant Garamond',Georgia,serif;--sans:'Outfit',system-ui,sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{height:100%}
+body{font-family:var(--sans);color:var(--text);background:var(--dark);min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* LAYOUT */
+.app{max-width:520px;margin:0 auto;width:100%;min-height:100vh;display:flex;flex-direction:column}
+.header{padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(42,165,160,0.08);flex-shrink:0}
+.logo{font-family:var(--serif);font-size:1.15rem;font-weight:700;color:var(--teal-glow)}
+.logo span{color:var(--gold);font-weight:400;font-style:italic;font-size:0.75rem}
+.progress-wrap{position:relative;height:3px;background:rgba(255,255,255,0.05);border-radius:2px;flex-shrink:0}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--teal),var(--teal-glow));border-radius:2px;transition:width 0.6s cubic-bezier(0.4,0,0.2,1);width:0%}
+.main{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:0;overflow-y:auto}
+
+/* SLIDES */
+.slide{width:100%;max-width:520px;padding:40px 24px 120px;display:none;opacity:0;transform:translateY(20px);transition:all 0.4s cubic-bezier(0.4,0,0.2,1)}
+.slide.active{display:block;opacity:1;transform:translateY(0)}
+
+/* WELCOME */
+.welcome{text-align:center;padding-top:8vh}
+.welcome h1{font-family:var(--serif);font-size:2rem;color:white;line-height:1.2;margin-bottom:16px;font-weight:600}
+.welcome h1 em{color:var(--teal-glow);font-style:italic}
+.welcome p{color:var(--text);font-size:0.9rem;line-height:1.7;margin-bottom:10px}
+.preview-box{margin:24px 0;padding:18px;border-radius:14px;background:rgba(42,165,160,0.06);border:1px solid rgba(42,165,160,0.12);text-align:left}
+.preview-box h3{font-family:var(--serif);font-size:1.1rem;color:var(--teal-glow);margin-bottom:10px}
+.preview-item{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.82rem;color:rgba(255,255,255,0.5)}
+.preview-item .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dot-green{background:var(--green)}
+.dot-blur{background:var(--gold)}
+
+/* QUESTION */
+.q-label{font-size:0.7rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--teal-glow);margin-bottom:6px}
+.q-title{font-family:var(--serif);font-size:1.5rem;color:white;line-height:1.3;margin-bottom:8px;font-weight:600}
+.q-sub{font-size:0.82rem;color:var(--text);margin-bottom:24px;line-height:1.6}
+
+/* INPUTS */
+.text-input,.number-input,.email-input{width:100%;padding:14px 18px;border-radius:12px;border:1.5px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:white;font-family:var(--sans);font-size:1rem;outline:none;transition:border-color 0.3s}
+.text-input:focus,.number-input:focus,.email-input:focus{border-color:var(--teal)}
+.number-input{text-align:center;font-size:1.6rem;font-weight:600;max-width:160px}
+.number-row{display:flex;gap:16px;align-items:flex-end}
+.number-group{flex:1}
+.number-group label{display:block;font-size:0.75rem;color:var(--text);margin-bottom:6px}
+.number-group input{width:100%;text-align:center;font-size:1.4rem}
+
+/* CARDS (obiective + momente) */
+.cards{display:flex;flex-direction:column;gap:10px}
+.card{padding:14px 18px;border-radius:12px;border:1.5px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);cursor:pointer;transition:all 0.25s;display:flex;align-items:center;gap:12px}
+.card:hover{border-color:rgba(42,165,160,0.3);background:rgba(42,165,160,0.05)}
+.card.selected{border-color:var(--teal);background:rgba(42,165,160,0.1)}
+.card-icon{font-size:1.4rem;flex-shrink:0}
+.card-text h4{font-size:0.92rem;color:white;font-weight:500;margin-bottom:2px}
+.card-text p{font-size:0.75rem;color:var(--text);line-height:1.4}
+
+/* EMOTIONAL MESSAGE */
+.emo-msg{margin-top:20px;padding:14px 18px;border-radius:12px;background:rgba(42,165,160,0.06);border:1px solid rgba(42,165,160,0.1);font-size:0.85rem;color:var(--teal-glow);font-style:italic;line-height:1.7;opacity:0;transform:translateY(10px);transition:all 0.5s ease 0.3s}
+.emo-msg.show{opacity:1;transform:translateY(0)}
+
+/* ACTIVITY SELECTOR */
+.activity-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.activity-opt{padding:12px;border-radius:12px;border:1.5px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);cursor:pointer;text-align:center;transition:all 0.25s;font-size:0.82rem;color:rgba(255,255,255,0.5)}
+.activity-opt:hover{border-color:rgba(42,165,160,0.3)}
+.activity-opt.selected{border-color:var(--teal);background:rgba(42,165,160,0.1);color:var(--teal-glow)}
+
+/* BUTTONS */
+.btn-row{position:fixed;bottom:0;left:0;right:0;padding:12px 24px;padding-bottom:max(12px,env(safe-area-inset-bottom));display:flex;justify-content:space-between;align-items:center;background:rgba(15,25,35,0.95);backdrop-filter:blur(20px);border-top:1px solid rgba(42,165,160,0.06);z-index:100}
+.btn{padding:12px 28px;border-radius:50px;border:none;font-family:var(--sans);font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.25s}
+.btn-back{background:transparent;color:rgba(255,255,255,0.3);border:1px solid rgba(255,255,255,0.08)}
+.btn-next{background:linear-gradient(135deg,var(--teal),var(--teal-dark));color:white;box-shadow:0 4px 16px rgba(42,165,160,0.25)}
+.btn-next:disabled{opacity:0.3;pointer-events:none}
+.btn-next:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 20px rgba(42,165,160,0.35)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-warm));color:white;box-shadow:0 4px 16px rgba(201,168,76,0.25)}
+
+/* RESULTS */
+.results{padding-top:4vh}
+.result-section{margin-bottom:28px}
+.result-section h3{font-family:var(--serif);font-size:1.2rem;color:white;margin-bottom:12px;font-weight:600}
+.result-card{padding:20px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);margin-bottom:12px}
+.result-big{font-family:var(--serif);font-size:2.8rem;font-weight:700;color:var(--teal-glow);line-height:1}
+.result-label{font-size:0.8rem;color:var(--text);margin-top:4px}
+.result-cat{display:inline-block;padding:4px 12px;border-radius:6px;font-size:0.75rem;font-weight:600;margin-top:8px}
+.cat-normal{background:rgba(72,187,120,0.15);color:var(--green)}
+.cat-over{background:rgba(201,168,76,0.15);color:var(--gold)}
+.cat-obese{background:rgba(224,122,106,0.15);color:var(--red)}
+.cat-under{background:rgba(232,160,191,0.15);color:var(--rose)}
+
+/* GAUGE */
+.gauge{width:100%;height:12px;border-radius:6px;background:linear-gradient(90deg,#3B82F6 0%,#48BB78 25%,#48BB78 45%,#C9A84C 65%,#E07A6A 85%,#DC2626 100%);position:relative;margin:16px 0 8px}
+.gauge-marker{position:absolute;top:-4px;width:4px;height:20px;background:white;border-radius:2px;transition:left 0.8s cubic-bezier(0.4,0,0.2,1)}
+.gauge-labels{display:flex;justify-content:space-between;font-size:0.65rem;color:rgba(255,255,255,0.3)}
+
+/* BLUR */
+.blurred-section{position:relative}
+.blurred-content{filter:blur(8px);pointer-events:none;user-select:none}
+.blur-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;text-align:center;padding:20px}
+.blur-overlay p{font-family:var(--serif);font-size:1.1rem;color:white;margin-bottom:16px;line-height:1.4}
+.blur-lock{width:40px;height:40px;border-radius:50%;background:rgba(201,168,76,0.15);display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:1.2rem}
+
+/* FREE ITEMS */
+.free-items{display:flex;flex-direction:column;gap:10px;margin:20px 0}
+.free-item{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;background:rgba(72,187,120,0.06);border:1px solid rgba(72,187,120,0.1)}
+.free-item .check{color:var(--green);font-weight:700}
+.free-item p{font-size:0.85rem;color:rgba(255,255,255,0.6)}
+
+/* UPGRADE CTA */
+.upgrade-box{margin:28px 0;padding:24px;border-radius:16px;background:linear-gradient(135deg,rgba(42,165,160,0.08),rgba(201,168,76,0.06));border:1px solid rgba(201,168,76,0.15);text-align:center}
+.upgrade-box h3{font-family:var(--serif);font-size:1.3rem;color:white;margin-bottom:8px}
+.upgrade-box p{font-size:0.85rem;color:var(--text);margin-bottom:16px;line-height:1.7}
+.upgrade-plans{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.plan-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);font-size:0.82rem}
+.plan-row.highlight{border-color:var(--teal);background:rgba(42,165,160,0.06)}
+.plan-name{color:rgba(255,255,255,0.7)}
+.plan-price{font-weight:600;color:var(--teal-glow)}
+.plan-row.highlight .plan-price{color:var(--gold)}
+
+/* RESPONSIVE */
+@media(max-width:480px){.welcome h1{font-size:1.6rem}.q-title{font-size:1.3rem}.result-big{font-size:2.2rem}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="logo">Change Your Body <span>by Dana Cioclov</span></div>
+    <div id="stepInfo" style="font-size:0.72rem;color:rgba(255,255,255,0.3)"></div>
+  </div>
+  <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+  <div class="main" id="main"></div>
+  <div class="btn-row">
+    <button class="btn btn-back" id="btnBack" onclick="goBack()" style="visibility:hidden">← Înapoi</button>
+    <button class="btn btn-next" id="btnNext" onclick="goNext()">Începe →</button>
+  </div>
+</div>
+
+<script src="CYB_Copy_MINI.js"></script>
+<script src="CYB_Calc.js"></script>
+<script src="CYB_Steps_MINI.js"></script>
+<script src="CYB_Engine_STABLE.js"></script>
+<script>
+
+let step = 0;
+let data = {};
+
+
+// Engine functions (interpretSignals, resolveRoute, selectMessage, personalize)
+// loaded from CYB_Engine.js via <script src> in HTML head.
+
+function render(){
+  const s = STEPS[step];
+  const pct = step===0?0:step>=STEPS.length-1?100:Math.round((step/(STEPS.length-1))*100);
+  document.getElementById('progBar').style.width=pct+'%';
+  document.getElementById('stepInfo').textContent = s.type==='welcome'||s.type==='results'?'':`${step} / ${STEPS.length-2}`;
+  document.getElementById('btnBack').style.visibility = step>0&&s.type!=='results'?'visible':'hidden';
+  
+  const main = document.getElementById('main');
+  const btn = document.getElementById('btnNext');
+  
+  if(s.type==='welcome'){
+    btn.textContent = UI.buttons.start;
+    btn.className = 'btn btn-next';
+    const w = UI.welcome;
+    main.innerHTML = `<div class="slide active"><div class="welcome">
+      <h1>${w.heading}</h1>
+      <p>${w.subtitle}</p>
+      <div class="preview-box">
+        <h3>${w.freeHeading}</h3>
+        ${w.freeItems.map(i=>'<div class="preview-item"><span class="dot dot-green"></span> '+i+'</div>').join('')}
+        <div style="height:1px;background:rgba(255,255,255,0.06);margin:10px 0"></div>
+        <h3 style="color:var(--gold)">${w.blurHeading}</h3>
+        ${w.blurItems.map(i=>'<div class="preview-item"><span class="dot dot-blur"></span> '+i+'</div>').join('')}
+      </div>
+    </div></div>`;
+  }
+  else if(s.type==='text'){
+    btn.textContent = UI.buttons.next;
+    btn.disabled = !data[s.id];
+    main.innerHTML = `<div class="slide active">
+      <div class="q-label">${s.label}</div>
+      <div class="q-title">${s.title}</div>
+      <div class="q-sub">${s.sub}</div>
+      <input class="text-input" type="text" placeholder="${s.ph}" value="${data[s.id]||''}" oninput="data['${s.id}']=this.value;document.getElementById('btnNext').disabled=!this.value.trim()">
+      <div class="emo-msg ${data[s.id]?'show':''}" id="emo">${data[s.id]&&emoMessages[s.id]?emoMessages[s.id](data):''}</div>
+    </div>`;
+  }
+  else if(s.type==='number'){
+    btn.textContent = UI.buttons.next;
+    btn.disabled = !data[s.id];
+    main.innerHTML = `<div class="slide active">
+      <div class="q-label">${s.label}</div>
+      <div class="q-title">${s.title}</div>
+      <div class="q-sub">${s.sub}</div>
+      <input class="number-input" type="number" placeholder="${s.ph}" min="${s.min}" max="${s.max}" value="${data[s.id]||''}" oninput="data['${s.id}']=parseInt(this.value);document.getElementById('btnNext').disabled=!this.value;showEmo()">
+      <div class="emo-msg" id="emo"></div>
+    </div>`;
+  }
+  else if(s.type==='measures'){
+    btn.textContent = UI.buttons.next;
+    btn.disabled = !(data.height&&data.weight);
+    main.innerHTML = `<div class="slide active">
+      <div class="q-label">${s.label}</div>
+      <div class="q-title">${s.title}</div>
+      <div class="q-sub">${s.sub}</div>
+      <div class="number-row">
+        <div class="number-group"><label>${UI.measures.heightLabel}</label><input class="number-input" type="number" placeholder="165" value="${data.height||''}" oninput="data.height=parseFloat(this.value);checkMeasures()"></div>
+        <div class="number-group"><label>${UI.measures.weightLabel}</label><input class="number-input" type="number" placeholder="72" value="${data.weight||''}" oninput="data.weight=parseFloat(this.value);checkMeasures()"></div>
+      </div>
+      <div class="emo-msg" id="emo"></div>
+    </div>`;
+  }
+  else if(s.type==='activity'){
+    btn.textContent = UI.buttons.next;
+    btn.disabled = data.activity===undefined;
+    const acts = ['Sedentară — birou, mașină, canapea','Ușor activă — mers pe jos ocazional','Moderat activă — mișcare 2-3x/săpt.','Foarte activă — sport zilnic'];
+    main.innerHTML = `<div class="slide active">
+      <div class="q-label">${s.label}</div>
+      <div class="q-title">${s.title}</div>
+      <div class="q-sub">${s.sub}</div>
+      <div class="activity-opts">${acts.map((a,i)=>'<div class="activity-opt '+(data.activity===i?'selected':'')+'" onclick="data.activity='+i+';render()">'+a+'</div>').join('')}</div>
+      <div class="emo-msg ${data.activity!==undefined?'show':''}" id="emo">${data.activity!==undefined&&emoMessages.activity?emoMessages.activity(data):''}</div>
+    </div>`;
+  }
+  else if(s.type==='cards'){
+    btn.textContent = UI.buttons.next;
+    btn.disabled = data[s.id]===undefined;
+    main.innerHTML = `<div class="slide active">
+      <div class="q-label">${s.label}</div>
+      <div class="q-title">${s.title}</div>
+      <div class="q-sub">${s.sub}</div>
+      <div class="cards">${s.opts.map((o,i)=>'<div class="card '+(data[s.id]===i?'selected':'')+'" onclick="data[\''+s.id+'\']='+i+';render();setTimeout(goNext,400)"><div class="card-icon">'+o.icon+'</div><div class="card-text"><h4>'+o.title+'</h4><p>'+o.desc+'</p></div></div>').join('')}</div>
+      <div class="emo-msg ${data[s.id]!==undefined?'show':''}" id="emo">${data[s.id]!==undefined&&emoMessages[s.id]?emoMessages[s.id](data):''}</div>
+    </div>`;
+  }
+  else if(s.type==='email'){
+    btn.textContent = UI.buttons.seeResults;
+    btn.className = 'btn btn-gold';
+    btn.disabled = !data.email||!data.email.includes('@');
+    main.innerHTML = `<div class="slide active">
+      <div class="q-label">${s.label}</div>
+      <div class="q-title">${s.title}</div>
+      <div class="q-sub">${s.sub}</div>
+      <input class="email-input" type="email" placeholder="${s.ph}" value="${data.email||''}" oninput="data.email=this.value;document.getElementById('btnNext').disabled=!this.value.includes('@')">
+      <div class="emo-msg show" style="margin-top:20px">${UI.emailPreResults}</div>
+    </div>`;
+  }
+  else if(s.type==='results'){
+    document.getElementById('btnBack').style.visibility='hidden';
+    btn.style.display='none';
+
+    // Engine: resolve route + select messages for this user
+    // Note: MINI has no `ans` object — signals use only MINI seed data (moment, activity)
+    const _signals = interpretSignals(data, {});
+    const _resolved = resolveRoute(data, _signals);
+    const _msgVal = selectMessage({ route: _resolved.route, signals: _signals, purpose: 'VALIDATION', screenContext: 'ONBOARDING' });
+    const _msgRes = selectMessage({ route: _resolved.route, signals: _signals, purpose: 'RESULTS', screenContext: 'RESULTS' });
+    const _valText = personalize(_msgVal.text, data.name);
+    const _resText = personalize(_msgRes.text, data.name);
+
+    const bmi = calcBMI(data.weight,data.height);
+    const bmr = calcBMR(data.weight,data.height,data.age);
+    const tdee = calcTDEE(bmr,data.activity||0);
+    const cat = bmiCat(bmi);
+    const ideal = idealWeight(data.height);
+    const gn = UI.goalNames;
+    const protein = Math.round(data.weight * 1.6);
+    const fat = Math.round(tdee * 0.25 / 9);
+    const carbs = Math.round((tdee - protein*4 - fat*9) / 4);
+    const deficit = tdee - 500;
+    const targetW = data.weight * 0.88;
+    const weeks = projWeeks(data.weight, targetW);
+    const R = R_UI;
+    const U = U_UI;
+    const gl = UI.gaugeLabels;
+    const ml = R.macroLabels;
+
+    const plansHtml = U.plans.map(function(p){
+      const cls = p.hl ? 'plan-row highlight' : (p.gold ? 'plan-row' : 'plan-row');
+      const st = p.gold ? 'border-color:var(--gold);background:rgba(201,168,76,0.06)' : '';
+      const nc = p.hl ? 'color:white' : (p.gold ? 'color:var(--gold)' : '');
+      const pc = p.hl ? 'color:var(--gold)' : (p.gold ? 'color:var(--gold)' : '');
+      const old = p.old ? ' <span style="font-size:0.7rem;color:var(--text);text-decoration:line-through">'+p.old+'</span>' : '';
+      return '<div class="'+cls+'" style="'+st+'"><span class="plan-name" style="'+nc+'">'+p.name+'</span><span class="plan-price" style="'+pc+'">'+p.price+old+'</span></div>';
+    }).join('');
+
+    main.innerHTML = `<div class="slide active"><div class="results">
+      <div style="text-align:center;margin-bottom:28px">
+        <div style="font-size:0.75rem;color:var(--teal-glow);font-weight:600;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">${R.headerTitle(data.name)}</div>
+        <h2 style="font-family:var(--serif);font-size:1.8rem;color:white;font-weight:600;line-height:1.2">${R.heading}</h2>
+        <p style="font-size:0.82rem;color:var(--text);margin-top:8px">${R.routePrefix}: <strong style="color:var(--gold)">${COPY.route.get(data.moment)}</strong></p>
+      </div>
+      <!-- Route-specific validation message (engine-driven) -->
+      <div class="emo-msg show" style="margin-bottom:20px">${_valText}</div>
+      <div class="result-section">
+        <h3 style="display:flex;align-items:center;gap:8px"><span style="color:var(--green)">✓</span> ${R.imcHeading}</h3>
+        <div class="result-card">
+          <div style="display:flex;align-items:flex-end;gap:12px"><div class="result-big">${bmi.toFixed(1)}</div><div><span class="result-cat ${cat.cls}">${cat.label}</span></div></div>
+          <div class="gauge"><div class="gauge-marker" style="left:${bmiPercent(bmi)}%"></div></div>
+          <div class="gauge-labels"><span>${gl[0]||''}</span><span>${gl[1]||''}</span><span>${gl[2]||''}</span><span>${gl[3]||''}</span></div>
+        </div>
+      </div>
+      <div class="result-section">
+        <h3 style="display:flex;align-items:center;gap:8px"><span style="color:var(--green)">✓</span> ${R.recoHeading}</h3>
+        <!-- Route-specific recommendation (engine-driven, replaces static recoBody) -->
+        <div class="result-card" style="font-size:0.88rem;color:rgba(255,255,255,0.6);line-height:1.8">${_resText}</div>
+      </div>
+      <div class="free-items">${R.freeItems.map(function(i){return '<div class="free-item"><span class="check">✓</span><p>'+i+'</p></div>'}).join('')}</div>
+      <div class="result-section blurred-section">
+        <div class="blur-overlay"><div class="blur-lock">🔒</div><p>${R.blurOverlay}</p></div>
+        <div class="blurred-content">
+          <h3>${R.bmrHeading}</h3>
+          <div class="result-card"><div class="result-big">${Math.round(bmr)}</div><div class="result-label">${R.bmrDesc}</div></div>
+          <h3>${R.tdeeHeading}</h3>
+          <div class="result-card"><div class="result-big">${Math.round(tdee)}</div><div class="result-label">${R.tdeeDesc}</div></div>
+          <h3>${R.macroHeading}</h3>
+          <div class="result-card" style="display:flex;gap:20px">
+            <div style="flex:1;text-align:center"><div style="font-size:1.4rem;font-weight:700;color:var(--teal-glow)">${protein}g</div><div class="result-label">${ml[0]||''}</div></div>
+            <div style="flex:1;text-align:center"><div style="font-size:1.4rem;font-weight:700;color:var(--gold)">${carbs}g</div><div class="result-label">${ml[1]||''}</div></div>
+            <div style="flex:1;text-align:center"><div style="font-size:1.4rem;font-weight:700;color:var(--rose)">${fat}g</div><div class="result-label">${ml[2]||''}</div></div>
+          </div>
+          <h3>${R.projHeading}</h3>
+          <div class="result-card"><div style="font-size:0.88rem;color:rgba(255,255,255,0.6)">${R.projBody(Math.round(deficit), weeks, targetW.toFixed(1))}</div></div>
+          <h3>${R.idealHeading}</h3>
+          <div class="result-card"><div style="font-size:1.2rem;font-weight:600;color:var(--teal-glow)">${ideal}</div><div class="result-label">${R.idealDesc(data.height)}</div></div>
+        </div>
+      </div>
+      <div class="upgrade-box">
+        <h3>${U.heading}</h3><p>${U.body}</p>
+        <div class="upgrade-plans">${plansHtml}</div>
+        <p style="margin-top:16px;font-size:0.78rem;color:var(--text)">${U.footer(COPY.route.get(data.moment))}</p>
+        <button class="btn btn-gold" style="margin-top:18px" onclick="goToComplete()">Continuă cu chestionarul complet →</button>
+      </div>
+    </div></div>`;
+  }
+}
+
+function showEmo(){
+  const s=STEPS[step];
+  if(data[s.id]!==undefined && emoMessages[s.id]){
+    const el=document.getElementById('emo');
+    if(el){el.textContent=emoMessages[s.id](data);el.classList.add('show')}
+  }
+}
+
+function checkMeasures(){
+  const ok=data.height>100&&data.height<250&&data.weight>30&&data.weight<250;
+  document.getElementById('btnNext').disabled=!ok;
+  if(ok&&emoMessages.measures){
+    const el=document.getElementById('emo');
+    if(el){el.textContent=emoMessages.measures(data);el.classList.add('show')}
+  }
+}
+
+function goNext(){
+  const s=STEPS[step];
+  if(s.type!=='welcome'&&s.type!=='results'){
+    // Auto-advance cards handle their own advance
+  }
+  if(step<STEPS.length-1){
+    if(STEPS[step+1].type==='results'){
+      localStorage.setItem('CYB_MINI_DATA', JSON.stringify(data));
+    }
+    step++;render();
+  }
+}
+function goBack(){if(step>0){step--;render()}}
+function goToComplete(){localStorage.setItem('CYB_MINI_DATA', JSON.stringify(data));window.location.href='CYB_Chestionar_COMPLET.html';}
+
+// Init
+render();
+</script>
+</body>
+</html>
