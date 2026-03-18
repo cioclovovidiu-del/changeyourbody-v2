@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CYB — Chestionar Complet 27Q Adaptiv</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--teal:#2AA5A0;--teal-deep:#1A9E9E;--teal-dark:#157575;--teal-glow:#3ECDC6;--gold:#C9A84C;--gold-warm:#D4AF37;--dark:#0F1923;--dark2:#1A2733;--text:rgba(255,255,255,0.55);--white:#F8FAFC;--rose:#E8A0BF;--coral:#D85A30;--green:#48BB78;--red:#E07A6A;--purple:#8B5CF6;--serif:'Cormorant Garamond',Georgia,serif;--sans:'Outfit',system-ui,sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{height:100%}
+body{font-family:var(--sans);color:var(--text);background:var(--dark);min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.app{max-width:540px;margin:0 auto;width:100%;min-height:100vh;display:flex;flex-direction:column}
+.header{padding:14px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(42,165,160,0.08);flex-shrink:0}
+.logo{font-family:var(--serif);font-size:1.1rem;font-weight:700;color:var(--teal-glow)}
+.logo span{color:var(--gold);font-weight:400;font-style:italic;font-size:0.7rem}
+.step-info{font-size:0.7rem;color:rgba(255,255,255,0.25)}
+.prog-wrap{height:3px;background:rgba(255,255,255,0.05)}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--teal),var(--teal-glow));transition:width 0.5s ease;width:0%}
+.main{flex:1;overflow-y:auto;padding:0}
+.slide{padding:32px 24px 140px;display:none;opacity:0;transform:translateY(16px);transition:all 0.35s ease}
+.slide.active{display:block;opacity:1;transform:translateY(0)}
+
+/* BLOCK HEADER */
+.block-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:50px;font-size:0.7rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px}
+.block-tag.teal{background:rgba(42,165,160,0.1);color:var(--teal-glow);border:1px solid rgba(42,165,160,0.15)}
+.block-tag.gold{background:rgba(201,168,76,0.1);color:var(--gold);border:1px solid rgba(201,168,76,0.15)}
+.block-tag.rose{background:rgba(232,160,191,0.1);color:var(--rose);border:1px solid rgba(232,160,191,0.15)}
+.block-tag.purple{background:rgba(139,92,246,0.1);color:var(--purple);border:1px solid rgba(139,92,246,0.15)}
+.block-tag.coral{background:rgba(216,90,48,0.1);color:var(--coral);border:1px solid rgba(216,90,48,0.15)}
+.q-title{font-family:var(--serif);font-size:1.4rem;color:white;line-height:1.3;margin-bottom:6px;font-weight:600}
+.q-sub{font-size:0.82rem;color:var(--text);margin-bottom:20px;line-height:1.6}
+.q-note{font-size:0.75rem;color:rgba(42,165,160,0.6);font-style:italic;margin-bottom:16px}
+
+/* OPTIONS */
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{padding:12px 16px;border-radius:11px;border:1.5px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.025);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:10px;font-size:0.88rem;color:rgba(255,255,255,0.6)}
+.opt:hover{border-color:rgba(42,165,160,0.25);background:rgba(42,165,160,0.04)}
+.opt.sel{border-color:var(--teal);background:rgba(42,165,160,0.1);color:var(--teal-glow)}
+.opt-letter{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;flex-shrink:0;border:1.5px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.3);transition:all 0.2s}
+.opt.sel .opt-letter{background:var(--teal);border-color:var(--teal);color:white}
+
+/* MULTI SELECT */
+.chk{padding:11px 14px;border-radius:11px;border:1.5px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.025);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:10px;font-size:0.85rem;color:rgba(255,255,255,0.55);margin-bottom:6px}
+.chk.sel{border-color:var(--teal);background:rgba(42,165,160,0.08);color:var(--teal-glow)}
+.chk-box{width:20px;height:20px;border-radius:5px;border:1.5px solid rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;font-size:0.7rem}
+.chk.sel .chk-box{background:var(--teal);border-color:var(--teal);color:white}
+.chk.sel .chk-box::after{content:'✓'}
+
+/* SCALE */
+.scale-row{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+.scale-btn{width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,0.03);border:1.5px solid rgba(255,255,255,0.07);color:rgba(255,255,255,0.4);font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center}
+.scale-btn.sel{background:var(--teal);border-color:var(--teal);color:white}
+.scale-labels{display:flex;justify-content:space-between;width:100%;margin-top:8px;font-size:0.68rem;color:rgba(255,255,255,0.2)}
+
+/* TEXTAREA */
+.ta{width:100%;padding:14px 16px;border-radius:12px;border:1.5px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.03);color:white;font-family:var(--sans);font-size:0.92rem;outline:none;min-height:80px;resize:vertical;transition:border-color 0.3s}
+.ta:focus{border-color:var(--teal)}
+
+/* EMO MESSAGE */
+.emo{margin-top:18px;padding:14px 16px;border-radius:12px;background:rgba(42,165,160,0.06);border:1px solid rgba(42,165,160,0.1);font-size:0.84rem;color:var(--teal-glow);font-style:italic;line-height:1.7;opacity:0;transition:opacity 0.5s ease 0.2s}
+.emo.show{opacity:1}
+
+/* BLOCK TRANSITION */
+.block-trans{text-align:center;padding:12vh 24px}
+.block-trans h2{font-family:var(--serif);font-size:1.6rem;color:white;margin-bottom:12px;font-weight:600}
+.block-trans h2 em{color:var(--teal-glow);font-style:italic}
+.block-trans p{font-size:0.88rem;color:var(--text);line-height:1.7}
+.block-trans .mini-result{margin:20px auto;padding:16px 20px;border-radius:12px;background:rgba(42,165,160,0.06);border:1px solid rgba(42,165,160,0.1);display:inline-block}
+.block-trans .mini-val{font-family:var(--serif);font-size:2rem;font-weight:700;color:var(--teal-glow)}
+.block-trans .mini-lbl{font-size:0.75rem;color:var(--text)}
+
+/* BUTTONS */
+.btn-row{position:fixed;bottom:0;left:0;right:0;padding:12px 24px;padding-bottom:max(12px,env(safe-area-inset-bottom));display:flex;justify-content:space-between;align-items:center;background:rgba(15,25,35,0.95);backdrop-filter:blur(20px);border-top:1px solid rgba(42,165,160,0.06);z-index:100}
+.btn{padding:12px 26px;border-radius:50px;border:none;font-family:var(--sans);font-size:0.88rem;font-weight:600;cursor:pointer;transition:all 0.25s}
+.btn-back{background:transparent;color:rgba(255,255,255,0.3);border:1px solid rgba(255,255,255,0.08)}
+.btn-next{background:linear-gradient(135deg,var(--teal),var(--teal-dark));color:white;box-shadow:0 4px 14px rgba(42,165,160,0.2)}
+.btn-next:disabled{opacity:0.25;pointer-events:none}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-warm));color:white;box-shadow:0 4px 14px rgba(201,168,76,0.2)}
+
+/* RESULTS */
+.res-section{margin-bottom:24px}
+.res-section h3{font-family:var(--serif);font-size:1.15rem;color:white;margin-bottom:10px;font-weight:600;display:flex;align-items:center;gap:8px}
+.res-card{padding:18px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);margin-bottom:10px}
+.score-bar{height:10px;border-radius:5px;background:rgba(255,255,255,0.06);margin:10px 0 4px;overflow:hidden}
+.score-fill{height:100%;border-radius:5px;transition:width 1s ease}
+.tag-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.safety-tag{padding:4px 10px;border-radius:6px;font-size:0.7rem;font-weight:600}
+.tag-exclude{background:rgba(224,122,106,0.12);color:var(--red)}
+.tag-include{background:rgba(72,187,120,0.12);color:var(--green)}
+.tag-info{background:rgba(139,92,246,0.12);color:var(--purple)}
+
+.profile-card{padding:20px;border-radius:16px;border:2px solid rgba(42,165,160,0.15);background:rgba(42,165,160,0.04);text-align:center;margin:20px 0}
+.profile-name{font-family:var(--serif);font-size:1.5rem;font-weight:700;color:var(--teal-glow);margin-bottom:4px}
+.profile-desc{font-size:0.82rem;color:var(--text);line-height:1.6}
+
+/* RESPONSIVE */
+@media(max-width:480px){.q-title{font-size:1.2rem}.block-trans h2{font-size:1.3rem}.scale-btn{width:38px;height:38px;font-size:0.85rem}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="logo">Change Your Body <span>by Dana Cioclov</span></div>
+    <div class="step-info" id="stepInfo"></div>
+  </div>
+  <div class="prog-wrap"><div class="prog-bar" id="progBar"></div></div>
+  <div class="main" id="main"></div>
+  <div class="btn-row">
+    <button class="btn btn-back" id="btnBack" onclick="prev()" style="visibility:hidden">← Înapoi</button>
+    <button class="btn btn-next" id="btnNext" onclick="next()">Continuă →</button>
+  </div>
+</div>
+
+<script src="CYB_Copy_COMPLET.js"></script>
+<script>
+
+const MINI = { name:'Maria', age:42, height:165, weight:72, activity:1, goal:0, moment:2, email:'maria@test.ro' };
+
+const Q = [
+  // === BLOCK TRANSITION: DESPRE TINE ===
+  {id:'trans_1', type:'transition', block:'Despre Tine', blockColor:'teal',
+    ...COPY.t('trans_1'), miniResult: true },
+
+  // BLOC 1: DESPRE TINE (5-6 comune)
+  {id:'q1', block:'Despre Tine', blockColor:'teal', type:'single',
+    ...COPY.q('q1'),
+    opts:['Sub 55 kg','55–60 kg','60–65 kg','65–70 kg','70–75 kg','Peste 75 kg','Nu am un număr — vreau doar să mă simt bine']},
+
+  {id:'q2', block:'Despre Tine', blockColor:'teal', type:'single',
+    ...COPY.q('q2'),
+    opts:['Măr (grăsime pe abdomen)','Pară (grăsime pe șolduri/coapse)','Clepsidră (distribuție egală)','Dreptunghi (fără curbe pronunțate)','Nu știu sigur']},
+
+  {id:'q3', block:'Despre Tine', blockColor:'teal', type:'single',
+    ...COPY.q('q3'),
+    opts:['Am luat în greutate (3+ kg)','Am oscilat sus-jos','A rămas la fel','Am slăbit fără să vreau','Am slăbit cu efort dar am revenit']},
+
+  {id:'q4', block:'Despre Tine', blockColor:'teal', type:'single',
+    ...COPY.q('q4'),
+    opts:['Nu','Da, 1 copil','Da, 2-3 copii','Da, 4+ copii']},
+
+  {id:'q4b', block:'Despre Tine', blockColor:'teal', type:'single',
+    ...COPY.q('q4b'),
+    opts:['Da, exclusiv','Da, parțial','Nu, dar am alăptat recent (sub 6 luni)','Nu'],
+    showIf:{field:'_moment',values:[0]}}, // doar postpartum
+
+  // === BLOCK TRANSITION: STIL DE VIAȚĂ ===
+  {id:'trans_2', type:'transition', block:'Stilul Tău de Viață', blockColor:'gold',
+    ...COPY.t('trans_2'), miniResult: false },
+
+  // BLOC 2: STIL DE VIAȚĂ (4-5 adaptate)
+  {id:'q5', block:'Stilul Tău de Viață', blockColor:'gold', type:'single',
+    ...COPY.q('q5'),
+    opts:['Bine (7-8h, odihnitor)','Ok, dar m-aș odihni mai bine','Prost (sub 6h sau treziri frecvente)','Foarte prost (insomnie / anxietate nocturnă)']},
+
+  {id:'q6', block:'Stilul Tău de Viață', blockColor:'gold', type:'single',
+    ...COPY.q('q6'),
+    opts:['Scăzut — viața e ok','Moderat — stres normal','Ridicat — mă simt copleșită frecvent','Foarte ridicat — mă afectează fizic']},
+
+  {id:'q7', block:'Stilul Tău de Viață', blockColor:'gold', type:'single',
+    ...COPY.q('q7'),
+    opts:['Remote / freelancer','Birou 8+ ore','În picioare / mișcare (vânzătoare, asistentă)','Mamă cu program complet acasă','Lucrez ture','Program mixt']},
+
+  {id:'q8', block:'Stilul Tău de Viață', blockColor:'gold', type:'single',
+    ...COPY.q('q8'),
+    opts:['Sub 15 minute','15-20 minute','20-30 minute','30-45 minute','Peste 45 minute']},
+
+  {id:'q9', block:'Stilul Tău de Viață', blockColor:'gold', type:'multi',
+    ...COPY.q('q9'),
+    opts:['Doar corpul meu','Scaun stabil + canapea','Saltea / covorășel','Sticle de apă (ca greutăți)','Benzi elastice','Gantere mici (1-3 kg)','Gantere medii (4-6 kg)','Gantere mari (7+ kg)','Kettlebell','Bicicletă staționară / bandă']},
+
+  {id:'q9b', block:'Stilul Tău de Viață', blockColor:'gold', type:'scale',
+    ...COPY.q('q9b'),
+    min:0, max:5, minL:'0 căni', maxL:'5+ căni',
+    showIf:{field:'_moment',values:[3]}}, // doar burnout
+
+  // === BLOCK TRANSITION: SĂNĂTATE ===
+  {id:'trans_3', type:'transition', block:'Sănătate & Limitări', blockColor:'rose',
+    ...COPY.t('trans_3') },
+
+  // BLOC 3: SĂNĂTATE (3-5 pe traseu)
+  {id:'q10', block:'Sănătate & Limitări', blockColor:'rose', type:'multi',
+    ...COPY.q('q10'),
+    opts:['Nu am nicio condiție','Diabet tip 2 / Rezistență la insulină','Hipotiroidism (Hashimoto)','PCOS','Hipertensiune','Probleme cardiace','Depresie / Anxietate (diagnosticată)']},
+
+  {id:'q11', block:'Sănătate & Limitări', blockColor:'rose', type:'textarea',
+    ...COPY.q('q11')},
+
+  {id:'q12', block:'Sănătate & Limitări', blockColor:'rose', type:'multi',
+    ...COPY.q('q12'),
+    opts:['Nu am nicio limitare','Dureri de genunchi','Dureri de spate (lombară)','Dureri cervicală / gât','Probleme la umăr','Probleme la șold','Hernie de disc','Incontinență urinară','Diastază abdominală','Varice','Vertij la schimbări de poziție']},
+
+  {id:'q13', block:'Sănătate & Limitări', blockColor:'rose', type:'single',
+    ...COPY.q('q13'),
+    opts:['Începător total','Începător — am făcut puțin','Intermediar — sport ocazional','Avansat — sport regulat']},
+
+  {id:'q13b', block:'Sănătate & Limitări', blockColor:'rose', type:'multi',
+    ...COPY.q('q13b'),
+    opts:['Bufeuri / valuri de căldură','Insomnie / treziri nocturne','Iritabilitate crescută','Greutate abdominală nouă','Libido scăzut','Transpirații nocturne','Uscăciune piele/păr','Niciuna din acestea'],
+    showIf:{field:'_moment',values:[2]}}, // doar hormonal
+
+  // === BLOCK TRANSITION: ALIMENTAȚIE ===
+  {id:'trans_4', type:'transition', block:'Alimentația Ta', blockColor:'purple',
+    ...COPY.t('trans_4') },
+
+  // BLOC 4: ALIMENTAȚIE (4-6 pe traseu)
+  {id:'q14', block:'Alimentația Ta', blockColor:'purple', type:'single',
+    ...COPY.q('q14'),
+    opts:['1-2 mese (sar peste mese)','3 mese principale','3 mese + 1-2 gustări','Mănânc când apuc, fără ritm']},
+
+  {id:'q15', block:'Alimentația Ta', blockColor:'purple', type:'single',
+    ...COPY.q('q15'),
+    opts:['Da, des — e o problemă reală','Uneori, când sunt stresată','Rar / Nu']},
+
+  {id:'q16', block:'Alimentația Ta', blockColor:'purple', type:'single',
+    ...COPY.q('q16'),
+    opts:['Sub 0.5 litri','0.5-1 litru','1-1.5 litri','1.5-2 litri','Peste 2 litri']},
+
+  {id:'q17', block:'Alimentația Ta', blockColor:'purple', type:'single',
+    ...COPY.q('q17'),
+    opts:['Nu, niciodată','Da, 1-2 diete','Da, câteva (2-3)','Da, multe (am tot încercat)','Sunt mereu la o dietă']},
+
+  {id:'q18', block:'Alimentația Ta', blockColor:'purple', type:'multi',
+    ...COPY.q('q18'),
+    opts:['Tradițional românesc','Mediteranean','Simplu / bland','Asiatic','Vegetarian / plant-based','Mănânc orice']},
+
+  {id:'q19', block:'Alimentația Ta', blockColor:'purple', type:'single',
+    ...COPY.q('q19'),
+    opts:['Sub 150 RON','150-250 RON','250-400 RON','Peste 400 RON']},
+
+  // === BLOCK TRANSITION: MOTIVAȚIE ===
+  {id:'trans_5', type:'transition', block:'Motivație', blockColor:'coral',
+    ...COPY.t('trans_5') },
+
+  // BLOC 5: MOTIVAȚIE (2-3 scurte)
+  {id:'q20', block:'Motivație', blockColor:'coral', type:'multi',
+    ...COPY.q('q20'),
+    opts:['Lipsa de timp','Lipsa de motivație','Nu știu ce să mănânc','Poftele / mâncatul emoțional','Lipsa de suport','Stresul','Nu văd rezultate destul de repede','Costurile mâncării sănătoase']},
+
+  {id:'q21', block:'Motivație', blockColor:'coral', type:'scale',
+    ...COPY.q('q21'),
+    min:1, max:10, minL:'Curioasă', maxL:'Extrem de motivată'},
+
+  // === RESULTS ===
+  {id:'results', type:'results'},
+];
+
+let idx = 0;
+let ans = {};
+let visible = [];
+
+function buildVisible(){
+  visible = Q.filter(q => {
+    if(!q.showIf) return true;
+    if(q.showIf.field === '_moment') return q.showIf.values.includes(MINI.moment);
+    const v = ans[q.showIf.field];
+    return v !== undefined && q.showIf.values.includes(v);
+  });
+}
+
+function cur(){ return visible[idx]; }
+function totalQ(){ return visible.filter(q=>q.id.startsWith('q')).length; }
+function curQ(){ let c=0; for(let i=0;i<=idx;i++){if(visible[i].id.startsWith('q'))c++} return c; }
+
+// ===== SCORING FUNCTIONS =====
+function calcStressScore(){
+  let score = 0;
+  const sleep = ans.q5 || 0; // 0=bine, 3=foarte prost
+  const stress = ans.q6 || 0;
+  const emoEat = ans.q15 || 0; // 0=da des, 2=rar
+  const water = ans.q16 || 0; // 0=sub 0.5L, 4=peste 2L
+  const diets = ans.q17 || 0;
+  score += sleep * 2.5; // max 7.5
+  score += stress * 2.5; // max 7.5
+  score += (2 - emoEat) * 1.5; // max 3 (inversed)
+  score += Math.max(0, 3 - water) * 0.8; // max 2.4
+  score += Math.min(diets, 3) * 0.5; // max 1.5
+  return Math.min(Math.round(score / 22.4 * 100), 100); // normalize to 0-100
+}
+
+function calcHormonalScore(){
+  let score = 0;
+  if(MINI.age >= 40) score += 15;
+  if(MINI.age >= 45) score += 15;
+  if(MINI.moment === 2) score += 20; // hormonal path
+  if(MINI.moment === 0) score += 10; // postpartum
+  const sleep = ans.q5 || 0;
+  if(sleep >= 2) score += 10;
+  const stress = ans.q6 || 0;
+  if(stress >= 2) score += 10;
+  const weightChange = ans.q3 || 0;
+  if(weightChange === 0) score += 10; // gained weight
+  // hormonal symptoms from q13b
+  if(ans.q13b && ans.q13b.length > 0){
+    score += Math.min(ans.q13b.length * 5, 20);
+  }
+  return Math.min(score, 100);
+}
+
+function getMetabolicProfile(){
+  const stress = calcStressScore();
+  const hormonal = calcHormonalScore();
+  const moment = MINI.moment;
+  const P = COPY.metabolicProfiles;
+  if(moment === 0) return P.postpartum;
+  if(moment === 4) return P.pierdere;
+  if(stress > 65) return P.antiCortizol;
+  if(hormonal > 60) return P.hormonalReset;
+  if(MINI.activity <= 1) return P.metabolismLent;
+  return P.echilibrat || COPY.fallback.metabolicProfile;
+}
+
+function getSafetyTags(){
+  const tags = [];
+  const limits = ans.q12 || [];
+  if(limits.includes(1)) tags.push({tag:'NO_KNEE',type:'exclude',label:'Fără exerciții genunchi'});
+  if(limits.includes(2)) tags.push({tag:'NO_BACK_L',type:'exclude',label:'Fără încărcare lombară'});
+  if(limits.includes(3)) tags.push({tag:'NO_BACK_C',type:'exclude',label:'Fără presiune cervicală'});
+  if(limits.includes(4)) tags.push({tag:'NO_SHOULDER',type:'exclude',label:'Fără exerciții umăr intens'});
+  if(limits.includes(5)) tags.push({tag:'NO_HIP',type:'exclude',label:'Fără impact șold'});
+  if(limits.includes(6)) tags.push({tag:'NO_DISC',type:'exclude',label:'Protecție hernie de disc'});
+  if(limits.includes(7)) tags.push({tag:'PELVIC_SAFE',type:'include',label:'Exerciții planșeu pelvian'});
+  if(limits.includes(8)) tags.push({tag:'NO_DIASTASIS',type:'exclude',label:'Fără exerciții diastază'});
+  if(limits.includes(9)) tags.push({tag:'NO_STANDING_LONG',type:'info',label:'Atenție varice'});
+  if(limits.includes(10)) tags.push({tag:'NO_POSITION_CHANGE',type:'exclude',label:'Tranziții lente'});
+  const exp = ans.q13 || 0;
+  if(exp <= 1) tags.push({tag:'BEGINNER',type:'include',label:'Nivel începător'});
+  const equip = ans.q9 || [];
+  if(equip.length === 1 && equip[0] === 0) tags.push({tag:'BODYWEIGHT_ONLY',type:'info',label:'Doar corp'});
+  if(MINI.moment === 0) tags.push({tag:'POSTPARTUM',type:'include',label:'Sigur postpartum'});
+  if(ans.q4b === 0 || ans.q4b === 1) tags.push({tag:'BREASTFEEDING',type:'info',label:'Alăptare — atenție calorii'});
+  return tags;
+}
+
+// ===== RENDER =====
+
+// =============================================================================
+// CYB ENGINE — inlined for COMPLET
+// SignalInterpreter + RouteResolver + MessageEngine
+// Note: Engine is inlined separately in MINI and COMPLET. When building the
+// unified prototype, extract to a shared <script> or .js module.
+// Modules: SignalInterpreter + RouteResolver + MessageEngine
+// =============================================================================
+
+// ── SIGNAL INTERPRETER ──────────────────────────────────────────────
+function interpretSignals(mini, ans) {
+  mini = mini || {}; ans = ans || {};
+  const moment=mini.moment, activity=mini.activity, sleep=ans.q5, stress=ans.q6,
+        emoEat=ans.q15, water=ans.q16, diets=ans.q17, motiv=ans.q21,
+        exp=ans.q13, limits=ans.q12||[], time=ans.q8;
+  const signals = {};
+  // overwhelmed
+  signals.overwhelmed = (moment===3||moment===4) || (sleep===3&&stress>=2) || (stress===3);
+  // selfBlame
+  if ((emoEat===0&&diets>=3)||moment===1) signals.selfBlame='high';
+  else if (emoEat<=1||diets===2) signals.selfBlame='medium';
+  else signals.selfBlame='low';
+  // actionCapacity
+  if (signals.overwhelmed||(sleep>=2&&time<=1)) signals.actionCapacity='low';
+  else if (sleep>=2||time<=1||stress>=2) signals.actionCapacity='medium';
+  else signals.actionCapacity='high';
+  // shameRisk
+  const limCount=(limits.filter(l=>l>0)).length;
+  if (moment===4||(emoEat===0&&limCount>=3)||(diets>=3&&emoEat===0)) signals.shameRisk='high';
+  else if (limCount>=1||diets>=2||emoEat<=1) signals.shameRisk='medium';
+  else signals.shameRisk='low';
+  // structureNeed
+  const meals=ans.q14, irregMeals=(meals===3), lowM=(motiv!==undefined&&motiv<=4), hiM=(motiv!==undefined&&motiv>=8);
+  if (exp<=1||irregMeals||lowM) signals.structureNeed='high';
+  else if (exp===2||(motiv>=5&&motiv<=7)) signals.structureNeed='medium';
+  else if (exp>=3&&hiM) signals.structureNeed='low';
+  else signals.structureNeed='medium';
+  // pressureTolerance
+  if (moment===4||moment===3||signals.overwhelmed) signals.pressureTolerance='low';
+  else if (moment===0||moment===1||moment===2) signals.pressureTolerance='medium';
+  else if (signals.actionCapacity!=='low') signals.pressureTolerance='high';
+  else signals.pressureTolerance='medium';
+  // motivationStyle
+  if (signals.pressureTolerance==='low') signals.motivationStyle='gentle';
+  else if (signals.pressureTolerance==='medium'||signals.structureNeed==='high') signals.motivationStyle='structured';
+  else signals.motivationStyle='direct';
+  return signals;
+}
+
+// ── ROUTE RESOLVER ──────────────────────────────────────────────────
+const ROUTES={POSTPARTUM:'POSTPARTUM',DIVORCE:'DIVORCE',HORMONAL:'HORMONAL',BURNOUT:'BURNOUT',LOSS:'LOSS',GENERAL:'GENERAL'};
+const MOMENT_TO_ROUTE={0:ROUTES.POSTPARTUM,1:ROUTES.DIVORCE,2:ROUTES.HORMONAL,3:ROUTES.BURNOUT,4:ROUTES.LOSS,5:ROUTES.GENERAL};
+
+function resolveRoute(mini, signals) {
+  mini=mini||{}; signals=signals||{};
+  const base=MOMENT_TO_ROUTE[mini.moment];
+  if (base===ROUTES.LOSS) return {route:ROUTES.LOSS,confidence:'high',source:'questionnaire',notes:null};
+  if (base===ROUTES.POSTPARTUM) return {route:ROUTES.POSTPARTUM,confidence:'high',source:signals.overwhelmed?'combined':'questionnaire',notes:signals.overwhelmed?'Postpartum + overwhelmed':null};
+  if (base===ROUTES.BURNOUT) return {route:ROUTES.BURNOUT,confidence:'high',source:'questionnaire',notes:null};
+  if (base!==ROUTES.BURNOUT&&signals.overwhelmed&&signals.actionCapacity==='low'&&signals.pressureTolerance==='low') {
+    if (base===ROUTES.GENERAL) return {route:ROUTES.BURNOUT,confidence:'medium',source:'signals',notes:'Signal-detected burnout'};
+    return {route:base,confidence:'high',source:'combined',notes:'Burnout-like signals on '+base};
+  }
+  if (base===ROUTES.DIVORCE) return {route:ROUTES.DIVORCE,confidence:'high',source:'questionnaire',notes:null};
+  if (base===ROUTES.HORMONAL) return {route:ROUTES.HORMONAL,confidence:'high',source:'questionnaire',notes:null};
+  if (base===ROUTES.GENERAL) return {route:ROUTES.GENERAL,confidence:'high',source:'questionnaire',notes:null};
+  return {route:ROUTES.GENERAL,confidence:'medium',source:'questionnaire',notes:'Fallback'};
+}
+
+// ── MESSAGE ENGINE ──────────────────────────────────────────────────
+const ENGINE_MESSAGES = [
+  // POSTPARTUM
+  {id:'pp_val_onb_01',route:'POSTPARTUM',purpose:'VALIDATION',ctx:'ONBOARDING',cond:null,
+    text:'Corpul tău tocmai a făcut cel mai greu și cel mai frumos lucru posibil. Ce simți acum — oboseala, schimbările, poate chiar sentimentul că nu te mai recunoști — e absolut normal.'},
+  {id:'pp_val_onb_02',route:'POSTPARTUM',purpose:'VALIDATION',ctx:'ONBOARDING',cond:{overwhelmed:true},
+    text:'Știu că totul e mult acum. Somnul, bebelușul, corpul care s-a schimbat. Nu trebuie să faci totul perfect — trebuie doar să fii aici. Și ești.'},
+  {id:'pp_results_01',route:'POSTPARTUM',purpose:'RESULTS',ctx:'RESULTS',cond:null,
+    text:'[Prenume], planul tău e construit pentru o mamă — nu pentru o sportivă. Rețete rapide, antrenamente scurte, tot ce ține cont de alăptare, de diastază, de nopțile nedormite. Pas cu pas. Fără grabă.'},
+  // DIVORCE
+  {id:'div_val_onb_01',route:'DIVORCE',purpose:'VALIDATION',ctx:'ONBOARDING',cond:null,
+    text:'O despărțire nu e un capăt de drum — e un nou început pe care încă nu îl vezi clar. Ce simți acum e răspunsul normal al corpului tău la o schimbare imensă.'},
+  {id:'div_val_onb_02',route:'DIVORCE',purpose:'VALIDATION',ctx:'ONBOARDING',cond:{selfBlame:'high'},
+    text:'Nu e vina ta că te simți așa. Cortizolul, hormonul stresului, îți afectează somnul, greutatea și energia. E biochimie, nu slăbiciune.'},
+  {id:'div_results_01',route:'DIVORCE',purpose:'RESULTS',ctx:'RESULTS',cond:null,
+    text:'[Prenume], ai avut curajul să începi ceva nou. Planul tău se concentrează pe reducerea stresului, pe mișcare care te face să te simți puternică, și pe alimentație care susține — nu restricționează.'},
+  // HORMONAL
+  {id:'hor_val_onb_01',route:'HORMONAL',purpose:'VALIDATION',ctx:'ONBOARDING',cond:null,
+    text:'Dacă simți că faci totul corect dar corpul nu mai răspunde — e pentru că regulile s-au schimbat fără să te întrebe nimeni. Nu e vina ta. E biologie.'},
+  {id:'hor_results_01',route:'HORMONAL',purpose:'RESULTS',ctx:'RESULTS',cond:null,
+    text:'[Prenume], planul tău e construit pe biologia ta de ACUM — nu pe cea de acum 10 ani. Antrenament de forță prioritar, nutriție adaptată, strategii pentru somn și energie.'},
+  // BURNOUT
+  {id:'burn_val_onb_01',route:'BURNOUT',purpose:'VALIDATION',ctx:'ONBOARDING',cond:null,
+    text:'Nu e normal să te simți epuizată tot timpul — dar la câte faci zilnic, e complet de înțeles că ai ajuns aici.'},
+  {id:'burn_val_onb_02',route:'BURNOUT',purpose:'VALIDATION',ctx:'ONBOARDING',cond:{overwhelmed:true,actionCapacity:'low'},
+    text:'Ești epuizată dar încă funcționezi — și tocmai asta e problema. Corpul ține scorul chiar și când tu nu mai ții.'},
+  {id:'burn_results_01',route:'BURNOUT',purpose:'RESULTS',ctx:'RESULTS',cond:null,
+    text:'[Prenume], programul tău începe cu liniște. Primele săptămâni: somn, hidratare, mișcare blândă. Zero presiune, zero HIIT. Abia când corpul tău iese din modul de supraviețuire, începem să construim.'},
+  // LOSS
+  {id:'loss_val_onb_01',route:'LOSS',purpose:'VALIDATION',ctx:'ONBOARDING',cond:null,
+    text:'Nu o să pretindem că înțelegem ce simți — pentru că fiecare pierdere e unică. Dar știm un lucru: corpul tău simte această durere la fel de profund ca sufletul tău.'},
+  {id:'loss_results_01',route:'LOSS',purpose:'RESULTS',ctx:'RESULTS',cond:null,
+    text:'[Prenume], nu îți cerem să fii motivată. Îți oferim un loc sigur în care să ai grijă de tine — când și cum poți. Suntem aici. Fără presiune. Fără termen limită.'},
+  // GENERAL
+  {id:'gen_val_onb_01',route:'GENERAL',purpose:'VALIDATION',ctx:'ONBOARDING',cond:null,
+    text:'Faptul că ești aici înseamnă că ai luat deja cea mai grea decizie: să începi. Ce urmează e diferit — pentru că e construit pe tine.'},
+  {id:'gen_results_01',route:'GENERAL',purpose:'RESULTS',ctx:'RESULTS',cond:null,
+    text:'[Prenume], profilul tău e unic — și planul tău va fi la fel. Tot ce urmează e construit pe răspunsurile tale. Consistența bate intensitatea.'},
+  // ── TRANSITION messages (block-specific) ──────────────────────────
+  {id:'trans_despre_01',route:'GENERAL',purpose:'TRANSITION',ctx:'ONBOARDING',cond:null,block:'despre_tine',
+    text:'Deja știm câteva lucruri importante despre tine. Acum vrem să înțelegem ce îți dorești cu adevărat — nu ce „ar trebui", ci ce simți TU că e important.'},
+  {id:'trans_stil_01',route:'GENERAL',purpose:'TRANSITION',ctx:'ONBOARDING',cond:null,block:'stil_viata',
+    text:'Următoarele întrebări sunt despre viața ta de zi cu zi. Nu există răspunsuri greșite — dacă dormi 4 ore și bei 5 cafele, asta e realitatea ta și noi lucrăm cu ea, nu împotriva ei.'},
+  {id:'trans_sanatate_01',route:'GENERAL',purpose:'TRANSITION',ctx:'ONBOARDING',cond:null,block:'sanatate',
+    text:'Ce urmează e important și poate fi personal. Fiecare răspuns ne ajută să facem programul tău mai sigur. Nu împărtășim aceste date cu nimeni — sunt doar pentru a te proteja.'},
+  {id:'trans_alimentatie_01',route:'GENERAL',purpose:'TRANSITION',ctx:'ONBOARDING',cond:null,block:'alimentatie',
+    text:'Relația cu mâncarea e complicată — mai ales după diete, stres, sau schimbări de viață. Nu îți cerem să fii „perfectă" în alimentație. Îți cerem doar să fii sinceră, ca să putem construi ceva care chiar funcționează pentru tine.'},
+  {id:'trans_motivatie_01',route:'GENERAL',purpose:'TRANSITION',ctx:'ONBOARDING',cond:null,block:'motivatie',
+    text:'[Prenume], ești aproape gata. Faptul că ai ajuns până aici spune ceva important despre tine: ești genul de femeie care nu renunță. Ține minte asta în zilele grele.'},
+  {id:'trans_final_01',route:'GENERAL',purpose:'TRANSITION',ctx:'ONBOARDING',cond:null,block:'final',
+    text:'[Prenume], profilul tău e complet. Am ascultat fiecare răspuns. Ce urmează e construit din tot ce ne-ai spus — pe obiectivul tău, pe viața ta, pe corpul tău. Ca apa, se mulează pe forma ta.'},
+];
+
+const SAFE_MSG = {id:'_safe',text:'Ești în locul potrivit. Hai să construim împreună.',fallback:true};
+
+function selectMessage(opts) {
+  const route=opts.route||'GENERAL', signals=opts.signals||{}, purpose=opts.purpose||'VALIDATION', ctx=opts.screenContext||null, block=opts.block||null;
+  let best=null, bestScore=-1;
+  for (const m of ENGINE_MESSAGES) {
+    let score=0;
+    if (m.route===route) score+=100; else if (m.route==='GENERAL') score+=10; else continue;
+    if (m.purpose!==purpose) continue;
+    if (ctx&&m.ctx===ctx) score+=50; else if (m.ctx&&m.ctx!==ctx) score-=20;
+    if (block&&m.block===block) score+=40; else if (block&&m.block&&m.block!==block) continue;
+    if (m.cond) { let ok=true; for(const[k,v]of Object.entries(m.cond)){if(signals[k]!==v){ok=false;break;}} if(ok)score+=30; else continue; }
+    if (score>bestScore){bestScore=score;best=m;}
+  }
+  return best ? {id:best.id,text:best.text,score:bestScore,fallback:false} : {id:SAFE_MSG.id,text:SAFE_MSG.text,score:0,fallback:true};
+}
+
+// ── PERSONALIZATION HELPER ──────────────────────────────────────────
+function personalize(text, name) {
+  return (text||'').replace(/\[Prenume\]/g, name||'');
+}
+
+
+function render(){
+  buildVisible();
+  const q = cur();
+  const pct = q.type==='results'?100:Math.round((idx/(visible.length-1))*100);
+  document.getElementById('progBar').style.width = pct+'%';
+  const tq = totalQ(); const cq = curQ();
+  document.getElementById('stepInfo').textContent = q.id.startsWith('q') ? `${cq}/${tq}` : q.type==='transition'?q.block:'';
+  document.getElementById('btnBack').style.visibility = idx>0&&q.type!=='results'?'visible':'hidden';
+  const btn = document.getElementById('btnNext');
+  btn.style.display = q.type==='results'?'none':'';
+  btn.className = 'btn btn-next';
+
+  const main = document.getElementById('main');
+
+  if(q.type === 'transition'){
+    btn.textContent = COPY.ui.buttons.next;
+    btn.disabled = false;
+    const bmr = (10*MINI.weight)+(6.25*MINI.height)-(5*MINI.age)-161;
+    const bmi = MINI.weight/((MINI.height/100)**2);
+    let miniHTML = '';
+    if(q.miniResult){
+      miniHTML = `<div class="mini-result"><div class="mini-val">${bmi.toFixed(1)}</div><div class="mini-lbl">${COPY.ui.miniResultLabel}</div></div>`;
+    }
+    // Engine: select transition body by block. Falls back to COPY.transitions body if no engine match.
+    const _transBlockMap = {trans_1:'despre_tine',trans_2:'stil_viata',trans_3:'sanatate',trans_4:'alimentatie',trans_5:'motivatie'};
+    const _transBlock = _transBlockMap[q.id] || null;
+    const _transSignals = interpretSignals(MINI, ans);
+    const _transRoute = resolveRoute(MINI, _transSignals);
+    const _transMsg = selectMessage({ route:_transRoute.route, signals:_transSignals, purpose:'TRANSITION', screenContext:'ONBOARDING', block:_transBlock });
+    const _transBody = _transMsg.fallback ? q.body : personalize(_transMsg.text, MINI.name);
+    main.innerHTML = `<div class="slide active"><div class="block-trans">
+      <div class="block-tag ${q.blockColor}">${q.block}</div>
+      <h2>${q.title}</h2>
+      <p>${_transBody}</p>${miniHTML}
+    </div></div>`;
+  }
+  else if(q.type === 'single'){
+    btn.textContent = COPY.ui.buttons.next;
+    btn.disabled = ans[q.id] === undefined;
+    const letters = 'ABCDEFGHIJKLM';
+    main.innerHTML = `<div class="slide active">
+      <div class="block-tag ${q.blockColor}">${q.block}</div>
+      <div class="q-title">${q.title}</div>
+      ${q.sub?`<div class="q-sub">${q.sub}</div>`:''}
+      ${q.note?`<div class="q-note">${q.note}</div>`:''}
+      <div class="opts">${q.opts.map((o,i)=>`<div class="opt ${ans[q.id]===i?'sel':''}" onclick="ans['${q.id}']=${i};render();setTimeout(next,350)">
+        <div class="opt-letter">${letters[i]}</div><span>${o}</span>
+      </div>`).join('')}</div>
+    </div>`;
+  }
+  else if(q.type === 'multi'){
+    btn.textContent = COPY.ui.buttons.next;
+    btn.disabled = !ans[q.id] || ans[q.id].length===0;
+    main.innerHTML = `<div class="slide active">
+      <div class="block-tag ${q.blockColor}">${q.block}</div>
+      <div class="q-title">${q.title}</div>
+      ${q.sub?`<div class="q-sub">${q.sub}</div>`:''}
+      ${q.note?`<div class="q-note">${q.note}</div>`:''}
+      <div>${q.opts.map((o,i)=>`<div class="chk ${(ans[q.id]||[]).includes(i)?'sel':''}" onclick="toggleChk('${q.id}',${i})">
+        <div class="chk-box"></div><span>${o}</span>
+      </div>`).join('')}</div>
+    </div>`;
+  }
+  else if(q.type === 'scale'){
+    btn.textContent = COPY.ui.buttons.next;
+    btn.disabled = ans[q.id] === undefined;
+    main.innerHTML = `<div class="slide active">
+      <div class="block-tag ${q.blockColor}">${q.block}</div>
+      <div class="q-title">${q.title}</div>
+      ${q.sub?`<div class="q-sub">${q.sub}</div>`:''}
+      <div class="scale-row">${Array.from({length:q.max-q.min+1},(_,i)=>i+q.min).map(v=>`<button class="scale-btn ${ans[q.id]===v?'sel':''}" onclick="ans['${q.id}']=${v};render();setTimeout(next,300)">${v}</button>`).join('')}</div>
+      <div class="scale-labels"><span>${q.minL}</span><span>${q.maxL}</span></div>
+    </div>`;
+  }
+  else if(q.type === 'textarea'){
+    btn.textContent = COPY.ui.buttons.next;
+    btn.disabled = !(ans[q.id]||'').trim();
+    main.innerHTML = `<div class="slide active">
+      <div class="block-tag ${q.blockColor}">${q.block}</div>
+      <div class="q-title">${q.title}</div>
+      ${q.sub?`<div class="q-sub">${q.sub}</div>`:''}
+      <textarea class="ta" placeholder="${COPY.ui.textareaPlaceholder}" oninput="ans['${q.id}']=this.value;document.getElementById('btnNext').disabled=!this.value.trim()">${ans[q.id]||''}</textarea>
+    </div>`;
+  }
+  else if(q.type === 'results'){
+    // Engine: resolve route + select messages using MINI seed + questionnaire answers
+    const _signals = interpretSignals(MINI, ans);
+    const _resolved = resolveRoute(MINI, _signals);
+    const _msgVal = selectMessage({ route: _resolved.route, signals: _signals, purpose: 'VALIDATION', screenContext: 'ONBOARDING' });
+    const _msgRes = selectMessage({ route: _resolved.route, signals: _signals, purpose: 'RESULTS', screenContext: 'RESULTS' });
+    const _valText = personalize(_msgVal.text, MINI.name);
+    const _resText = personalize(_msgRes.text, MINI.name);
+
+    const stress = calcStressScore();
+    const hormonal = calcHormonalScore();
+    const profile = getMetabolicProfile();
+    const tags = getSafetyTags();
+    const bmr = (10*MINI.weight)+(6.25*MINI.height)-(5*MINI.age)-161;
+    const tdee = bmr * [1.2,1.375,1.55,1.725][MINI.activity||0];
+    const CR = COPY.ui.results;
+    const timeAvail = CR.timeOptions;
+    const expOpts = CR.expOptions;
+    const mealOpts = CR.mealOptions;
+    const budgetOpts = CR.budgetOptions;
+    const PL = CR.paramLabels;
+    const SL = CR.stressLevels;
+    const HL = CR.hormonalLevels;
+
+    const stressLabel = stress>65 ? SL.high : (stress>40 ? SL.moderate : SL.low);
+    const hormonalLabel = hormonal>60 ? HL.high : (hormonal>35 ? HL.moderate : HL.low);
+
+    main.innerHTML = `<div class="slide active" style="padding-top:24px">
+      <div style="text-align:center;margin-bottom:28px">
+        <div class="block-tag teal">${CR.headerTag}</div>
+        <h2 style="font-family:var(--serif);font-size:1.6rem;color:white;margin:12px 0 4px">${CR.headerTitle(MINI.name)}</h2>
+        <p style="font-size:0.82rem">${CR.routePrefix}: <strong style="color:var(--gold)">${COPY.route.get(MINI.moment)}</strong> · ${totalQ()} ${CR.analyzedSuffix}</p>
+      </div>
+      <!-- Route-specific validation message (engine-driven) -->
+      <div class="emo" style="opacity:1;margin:0 0 20px;padding:14px 16px;border-radius:12px;background:rgba(42,165,160,0.06);border:1px solid rgba(42,165,160,0.1);font-size:0.84rem;color:var(--teal-glow);font-style:italic;line-height:1.7">${_valText}</div>
+
+      <div class="profile-card">
+        <div style="font-size:0.7rem;color:var(--text);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px">${CR.profileLabel}</div>
+        <div class="profile-name" style="color:${profile.color}">${profile.name}</div>
+        <div class="profile-desc">${profile.desc}</div>
+      </div>
+
+      <div class="res-section">
+        <h3>${CR.stressHeading}</h3>
+        <div class="res-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end">
+            <div style="font-family:var(--serif);font-size:2rem;font-weight:700;color:${stress>65?'var(--red)':stress>40?'var(--gold)':'var(--green)'}">${stress}%</div>
+            <div style="font-size:0.78rem;color:var(--text)">${stressLabel}</div>
+          </div>
+          <div class="score-bar"><div class="score-fill" style="width:${stress}%;background:${stress>65?'var(--red)':stress>40?'var(--gold)':'var(--green)'}"></div></div>
+          <div style="font-size:0.72rem;color:rgba(255,255,255,0.3);margin-top:4px">${CR.stressSource}</div>
+        </div>
+      </div>
+
+      <div class="res-section">
+        <h3>${CR.hormonalHeading}</h3>
+        <div class="res-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end">
+            <div style="font-family:var(--serif);font-size:2rem;font-weight:700;color:${hormonal>60?'var(--purple)':hormonal>35?'var(--gold)':'var(--green)'}">${hormonal}%</div>
+            <div style="font-size:0.78rem;color:var(--text)">${hormonalLabel}</div>
+          </div>
+          <div class="score-bar"><div class="score-fill" style="width:${hormonal}%;background:${hormonal>60?'var(--purple)':hormonal>35?'var(--gold)':'var(--green)'}"></div></div>
+          <div style="font-size:0.72rem;color:rgba(255,255,255,0.3);margin-top:4px">${CR.hormonalSource}</div>
+          <div style="font-size:0.72rem;color:var(--teal-glow);margin-top:6px;font-style:italic">${CR.hormonalDisclaimer}</div>
+        </div>
+      </div>
+
+      <div class="res-section">
+        <h3><span style="color:var(--green)">✓</span> ${CR.caloricHeading}</h3>
+        <div class="res-card" style="display:flex;gap:16px">
+          <div style="flex:1;text-align:center"><div style="font-family:var(--serif);font-size:1.6rem;font-weight:700;color:var(--teal-glow)">${Math.round(bmr)}</div><div style="font-size:0.72rem;color:var(--text)">${CR.bmrLabel}</div></div>
+          <div style="width:1px;background:rgba(255,255,255,0.06)"></div>
+          <div style="flex:1;text-align:center"><div style="font-family:var(--serif);font-size:1.6rem;font-weight:700;color:var(--gold)">${Math.round(tdee)}</div><div style="font-size:0.72rem;color:var(--text)">${CR.tdeeLabel}</div></div>
+        </div>
+      </div>
+
+      <div class="res-section">
+        <h3>${CR.tagsHeading}</h3>
+        <div class="res-card">
+          ${tags.length === 0 ? '<p style="font-size:0.85rem;color:var(--text)">'+CR.tagsEmpty+'</p>' :
+          '<div class="tag-list">'+tags.map(function(t){return '<span class="safety-tag tag-'+t.type+'">'+(t.type==='exclude'?'✕':'✓')+' '+t.label+'</span>'}).join('')+'</div>'}
+          <div style="font-size:0.72rem;color:rgba(255,255,255,0.25);margin-top:10px">${CR.tagsFooter}</div>
+        </div>
+      </div>
+
+      <div class="res-section">
+        <h3>${CR.paramsHeading}</h3>
+        <div class="res-card">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:0.82rem">
+            <div><span style="color:var(--text)">${PL.time}</span> <strong style="color:white">${timeAvail[ans.q8||2]||''}</strong></div>
+            <div><span style="color:var(--text)">${PL.experience}</span> <strong style="color:white">${expOpts[ans.q13||0]||''}</strong></div>
+            <div><span style="color:var(--text)">${PL.meals}</span> <strong style="color:white">${mealOpts[ans.q14||1]||''}</strong></div>
+            <div><span style="color:var(--text)">${PL.budget}</span> <strong style="color:white">${budgetOpts[ans.q19||1]||''} RON</strong></div>
+            <div><span style="color:var(--text)">${PL.motivation}</span> <strong style="color:white">${ans.q21||7}/10</strong></div>
+            <div><span style="color:var(--text)">${PL.equipment}</span> <strong style="color:white">${(ans.q9||[]).length} tipuri</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Route-specific conclusion (engine-driven, replaces static finalHeading + finalBody) -->
+      <div style="text-align:center;padding:24px 0;border-top:1px solid rgba(255,255,255,0.06);margin-top:12px">
+        <p style="font-size:0.88rem;color:var(--text);line-height:1.8;margin-bottom:12px">${_resText}</p>
+        <p style="margin-top:16px;font-size:0.88rem;font-style:italic;color:var(--teal-glow)">${CR.finalQuote}</p>
+      </div>
+    </div>`;
+  }
+}
+
+
+function toggleChk(id, val){
+  if(!ans[id]) ans[id] = [];
+  const i = ans[id].indexOf(val);
+  if(i>-1) ans[id].splice(i,1); else ans[id].push(val);
+  ans[id] = [...ans[id]];
+  render();
+}
+
+function next(){if(idx<visible.length-1){idx++;render();document.querySelector('.main').scrollTop=0}}
+function prev(){if(idx>0){idx--;render();document.querySelector('.main').scrollTop=0}}
+
+// Init
+buildVisible();
+render();
+</script>
+</body>
+</html>
